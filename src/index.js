@@ -1,1 +1,1 @@
-import { createNote } from "./createNew.js";
+import { createNote } from "./data/todo.js";
