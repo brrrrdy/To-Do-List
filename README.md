@@ -31,6 +31,17 @@
 
 <!-- UI -->
 
+    Home
+    About
+    New Note
+    Projects
+    Sort By
+        Date
+        Priority
+        Alphabetically
+        Oldest
+        Newest
+
 <!-- Notes -->
 
     - save to localStorage
