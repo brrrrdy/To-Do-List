@@ -1,5 +1,6 @@
 .
 ├── README.md
+├── cmnds.txt
 ├── dist
 │   ├── index.html
 │   └── main.js
@@ -14,6 +15,4 @@
 │   └── index.js
 └── webpack.config.js
 
-3 directories, 11 files
-
-tree -I node_modules > output.txt
+3 directories, 12 files
