@@ -5,6 +5,7 @@ export default class ToDo {
   constructor(
     title,
     projectAssign,
+    description,
     dueDate,
     priority,
     checklist = [],
@@ -14,6 +15,7 @@ export default class ToDo {
     this.title = title;
     this.projectAssign = projectAssign;
     this.dueDate = newDate(dueDate);
+    this.description = description;
     this.priority = priority;
     this.checklist = checklist;
     this.label = label;

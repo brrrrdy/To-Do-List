@@ -12,7 +12,7 @@ function addTodoToUI(todo) {
   todoList.push(todo);
 
   const li = document.createElement("li");
-  li.textContent = `${todo.title} — due on ${todo.dueDate}`;
+  li.textContent = `${todo.title} ${todo.description} — due on ${todo.dueDate}`;
   ul.appendChild(li);
 }
 

@@ -1,19 +1,22 @@
 import ToDo from "../data/todo.js";
 
-export function initForm(onNewToDo) {
-  const todoForm = document.getElementById("todo-form");
-  const todoList = document.getElementById("todo-list");
+export function initForm(addTodoCallback) {
+  const form = document.getElementById("todo-form");
 
-  todoForm.addEventListener("submit", (e) => {
+  form.addEventListener("submit", (e) => {
     e.preventDefault();
 
-    const title = document.getElementById("title").value;
-    const dueDate = document.getElementById("dueDate").value;
+    const title = form.querySelector("#title").value;
+    const description = form.querySelector("#description").value;
+    const dueDate = form.querySelector("#dueDate").value;
 
-    const todo = new ToDo(title, "Default Project", dueDate, "Medium");
+    const projectAssign = "Default Project";
+    const priority = "Normal";
 
-    onNewToDo(todo);
+    const todo = new ToDo(title, projectAssign, description, dueDate, priority);
 
-    todoForm.reset();
+    addTodoCallback(todo);
+
+    form.reset();
   });
 }
