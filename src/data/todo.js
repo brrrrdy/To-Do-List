@@ -1,4 +1,4 @@
-import { newDate, parseISO } from "../utils/date.js";
+import { newDate } from "../utils/date.js";
 import { generateUUID } from "../utils/id.js";
 
 export default class ToDo {
@@ -13,7 +13,7 @@ export default class ToDo {
   ) {
     this.title = title;
     this.projectAssign = projectAssign;
-    this.dueDate = isDate(dueDate) ? dueDate : makeNewDate(dueDate);
+    this.dueDate = newDate(dueDate);
     this.priority = priority;
     this.checklist = checklist;
     this.label = label;

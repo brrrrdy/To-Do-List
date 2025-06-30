@@ -1,15 +1,20 @@
 import ToDo from "./data/todo.js";
+import { initForm } from "./ui/form.js";
 
-const todo1 = new ToDo(
-  "Learn Webpack",
-  "Practice Project",
-  "2025-07-15",
-  "High",
-  ["Setup config", "Write modules"],
-  "Learning",
-  false
-);
+const todoList = []; // store todos here
+const container = document.getElementById("container");
 
-const outputDiv = document.getElementById("output");
-outputDiv.textContent = `Created ToDo: ${todo1.title}, Due: ${todo1.dueDate}`;
-console.log(todo1);
+// Create a <ul> for the todos inside container if you don’t have one yet
+const ul = document.createElement("ul");
+container.appendChild(ul);
+
+function addTodoToUI(todo) {
+  todoList.push(todo);
+
+  const li = document.createElement("li");
+  li.textContent = `${todo.title} — due on ${todo.dueDate}`;
+  ul.appendChild(li);
+}
+
+// Initialize form and provide the callback
+initForm(addTodoToUI);
