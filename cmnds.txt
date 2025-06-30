@@ -6,7 +6,6 @@ npm install --save-dev style-loader css-
 npm install --save-dev html-loader
 npm install date-fns
 
-
 npx webpack serve
 
 // webpack.config.js
@@ -47,3 +46,8 @@ module.exports = {
     ],
   },
 };
+
+## Tree export
+
+tree -I node_modules > output.txt
+

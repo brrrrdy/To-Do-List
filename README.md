@@ -6,11 +6,12 @@
 
         title
             description (optional)
+            projectAssign
             dueDate (optional)
             priority (optional)
-            notes (optional)
             checklist (optional)
             label (optional)
+
 
 <!-- note functionality logic -->
 

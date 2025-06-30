@@ -8,11 +8,23 @@
 ├── package-lock.json
 ├── package.json
 ├── src
-│   ├── createNew.js
-│   ├── images
+│   ├── assets
 │   │   └── home.svg
+│   ├── data
+│   │   ├── appData.js
+│   │   ├── project.js
+│   │   ├── storage.js
+│   │   └── todo.js
 │   ├── index.html
-│   └── index.js
+│   ├── index.js
+│   ├── ui
+│   │   ├── dom.js
+│   │   ├── events.js
+│   │   ├── form.js
+│   │   └── nav.js
+│   └── utils
+│       ├── date.js
+│       └── helpers.js
 └── webpack.config.js
 
-3 directories, 12 files
+6 directories, 21 files
