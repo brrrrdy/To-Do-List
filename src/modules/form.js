@@ -1,4 +1,4 @@
-import ToDo from "../data/todo.js";
+import ToDo from "./toDos.js";
 
 export function initForm(addTodoCallback) {
   const form = document.getElementById("todo-form");

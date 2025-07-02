@@ -10,21 +10,18 @@
 ├── src
 │   ├── assets
 │   │   └── home.svg
-│   ├── data
-│   │   ├── appData.js
-│   │   ├── project.js
-│   │   ├── storage.js
-│   │   └── todo.js
 │   ├── index.html
 │   ├── index.js
-│   ├── ui
-│   │   ├── dom.js
-│   │   ├── events.js
-│   │   ├── form.js
-│   │   └── nav.js
-│   └── utils
+│   └── modules
 │       ├── date.js
-│       └── id.js
+│       ├── dom.js
+│       ├── eventListener.js
+│       ├── form.js
+│       ├── id.js
+│       ├── localStorage.js
+│       ├── projects.js
+│       ├── toDos.js
+│       └── ui.js
 └── webpack.config.js
 
-6 directories, 21 files
+4 directories, 20 files
