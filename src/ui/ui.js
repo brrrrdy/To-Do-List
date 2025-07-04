@@ -1,6 +1,5 @@
-import { initForm } from "./form.js";
-import { loadProjects, saveProjects } from "./projects.js";
-import { renderProjects, renderTodos } from "./dom.js";
+import { initForm } from "../models/form.js";
+import { loadProjects, saveProjects } from "../models/projects.js";
 
 export function renderUI() {
   const projects = loadProjects();

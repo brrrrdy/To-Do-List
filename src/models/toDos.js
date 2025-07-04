@@ -1,5 +1,5 @@
-import { newDate } from "./date.js";
-import { generateUUID } from "./id.js";
+import { newDate } from "../utils/date.js";
+import { generateUUID } from "../utils/id.js";
 
 export default class ToDo {
   constructor(
