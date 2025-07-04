@@ -12,17 +12,17 @@
 │   │   └── home.svg
 │   ├── index.html
 │   ├── index.js
-│   ├── modules
-│   │   ├── date.js
-│   │   ├── dom.js
-│   │   ├── eventListener.js
+│   ├── models
 │   │   ├── form.js
-│   │   ├── id.js
-│   │   ├── localStorage.js
 │   │   ├── projects.js
-│   │   ├── toDos.js
+│   │   └── toDos.js
+│   ├── styles.css
+│   ├── ui
 │   │   └── ui.js
-│   └── styles.css
+│   └── utils
+│       ├── date.js
+│       ├── id.js
+│       └── localStorage.js
 └── webpack.config.js
 
-4 directories, 21 files
+6 directories, 19 files
