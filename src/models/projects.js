@@ -1,8 +1,10 @@
+import { generateUUID } from "../utils/id.js";
+
 export class Project {
   constructor(name) {
     this.name = name;
     this.todos = [];
-    this.id = generateUUID(); // Make sure you have this from id.js
+    this.id = generateUUID();
   }
 
   addTodo(todo) {
@@ -18,15 +20,19 @@ export class Project {
   }
 }
 
-// Initialize with default project if none exists
 export function loadProjects() {
   const stored = localStorage.getItem("storedProjects");
   if (stored) {
-    return JSON.parse(stored);
+    const parsed = JSON.parse(stored);
+    // Reconstruct Project objects
+    return parsed.map((p) => {
+      const project = new Project(p.name);
+      project.todos = p.todos;
+      project.id = p.id;
+      return project;
+    });
   }
-
-  const defaultProject = new Project("Default Project");
-  return [defaultProject];
+  return [new Project("Default Project")];
 }
 
 export function saveProjects(projects) {

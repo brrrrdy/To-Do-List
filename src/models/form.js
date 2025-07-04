@@ -2,18 +2,18 @@ import ToDo from "./toDos.js";
 
 export function initForm(addTodoCallback) {
   const form = document.getElementById("todo-form");
+  if (!form) throw new Error("Form element not found!");
 
   form.addEventListener("submit", (e) => {
     e.preventDefault();
 
-    const title = form.querySelector("#title").value;
-    const description = form.querySelector("#description").value;
-    const dueDate = form.querySelector("#dueDate").value;
-    const priority = form.querySelector("#priority").value;
-
-    const projectAssign = "Default Project";
-
-    const todo = new ToDo(title, projectAssign, description, dueDate, priority);
+    const todo = new ToDo(
+      form.querySelector("#title").value,
+      "Default Project",
+      form.querySelector("#description").value,
+      form.querySelector("#dueDate").value,
+      form.querySelector("#priority").value
+    );
 
     addTodoCallback(todo);
     form.reset();
