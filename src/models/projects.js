@@ -24,7 +24,7 @@ export function loadProjects() {
   const stored = localStorage.getItem("storedProjects");
   if (stored) {
     const parsed = JSON.parse(stored);
-    // Reconstruct Project objects
+
     return parsed.map((p) => {
       const project = new Project(p.name);
       project.todos = p.todos;
