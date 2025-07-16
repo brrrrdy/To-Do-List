@@ -2,19 +2,15 @@ import { Project, loadProjects, saveProjects } from "../models/projects.js";
 import ToDo from "../models/toDos.js";
 
 export function renderUI() {
-  // Initialize projects and get default project
   const projects = loadProjects();
   const defaultProject = ensureDefaultProject(projects);
 
-  // Initial render
   renderProjects(projects);
   renderTodos(defaultProject.getTodos());
-
-  // Setup form handler
   setupTodoForm(defaultProject, projects);
 }
 
-// Helper functions
+// Project Helpers
 function ensureDefaultProject(projects) {
   let defaultProject = projects.find((p) => p.name === "Default Project");
   if (!defaultProject) {
@@ -41,6 +37,7 @@ function renderProjects(projects) {
     .join("");
 }
 
+// Todo Rendering
 function renderTodos(todos) {
   const container = document.getElementById("todos-container");
   if (!container) return;
@@ -59,14 +56,15 @@ function sortTodosByPriority(todos) {
 }
 
 function createTodoHTML(todo) {
+  const priority = todo.priority || "Normal";
   return `
-    <div class="todo-item ${todo.priority.toLowerCase()}" data-todo-id="${
+    <div class="todo-item ${priority.toLowerCase()}" data-todo-id="${
     todo.noteID
   }">
       <div class="todo-header">
         <h3 class="todo-title">${todo.title}</h3>
-        <span class="priority-badge ${todo.priority.toLowerCase()}">
-          ${todo.priority}
+        <span class="priority-badge ${priority.toLowerCase()}">
+          ${priority}
         </span>
       </div>
       <p class="todo-description">${todo.description || "No description"}</p>
@@ -81,19 +79,24 @@ function createTodoHTML(todo) {
   `;
 }
 
+// Date Handling (Single Declaration)
 function formatDate(dateString) {
   if (!dateString) return "No due date";
+
   try {
-    return new Date(dateString).toLocaleDateString("en-US", {
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return "Invalid date";
+    return date.toLocaleDateString("en-US", {
       month: "short",
       day: "numeric",
       year: "numeric",
     });
   } catch {
-    return dateString;
+    return dateString; // Return raw string if formatting fails
   }
 }
 
+// Form Handling
 function setupTodoForm(defaultProject, projects) {
   const form = document.getElementById("todo-form");
   if (!form) return;
@@ -101,13 +104,22 @@ function setupTodoForm(defaultProject, projects) {
   form.addEventListener("submit", (e) => {
     e.preventDefault();
 
-    const formData = new FormData(form);
+    const title = form.querySelector("#title").value;
+    const description = form.querySelector("#description").value;
+    const priority = form.querySelector("#priority").value || "Normal";
+    const dueDate = form.querySelector("#dueDate").value;
+
+    if (!title) {
+      alert("Title is required!");
+      return;
+    }
+
     const newTodo = new ToDo(
-      formData.get("title"),
+      title,
       "Default Project",
-      formData.get("description"),
-      formData.get("dueDate"),
-      formData.get("priority")
+      description,
+      dueDate, // Store raw date string
+      priority
     );
 
     defaultProject.addTodo(newTodo);
@@ -116,7 +128,7 @@ function setupTodoForm(defaultProject, projects) {
     form.reset();
   });
 
-  // Event delegation for todo actions
+  // Event Delegation
   document.addEventListener("click", (e) => {
     const todoId = e.target.dataset.todoId;
     if (!todoId) return;
