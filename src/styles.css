@@ -286,6 +286,71 @@ textarea {
   color: var(--danger);
 }
 
+/* Project Buttons */
+
+.new-project-btn {
+  width: 100%;
+  padding: 10px;
+  background-color: #4caf50;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-top: 10px;
+}
+
+.new-project-btn:hover {
+  background-color: #45a049;
+}
+
+.new-project-form {
+  margin-top: 10px;
+  padding: 10px;
+  background-color: #f5f5f5;
+  border-radius: 4px;
+}
+
+.new-project-form input {
+  width: 100%;
+  padding: 8px;
+  margin-bottom: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.project-form-buttons {
+  display: flex;
+  gap: 5px;
+}
+
+.add-project-btn {
+  flex: 1;
+  padding: 8px;
+  background-color: #4caf50;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.add-project-btn:hover {
+  background-color: #45a049;
+}
+
+.cancel-project-btn {
+  flex: 1;
+  padding: 8px;
+  background-color: #f44336;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.cancel-project-btn:hover {
+  background-color: #d32f2f;
+}
+
 /* Empty State */
 .empty-message {
   text-align: center;
