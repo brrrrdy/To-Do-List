@@ -12,13 +12,25 @@ const dom = {
 };
 
 // Main UI Controller
+let activeProjectId = null; // Track active project by id
+let todoActionListenerAdded = false; // Prevent multiple listeners
+
 export function renderUI() {
   const projects = loadProjects();
   const { defaultProject, archiveProject } = ensureDefaultProjects(projects);
 
+  // Set default active project if not set
+  if (!activeProjectId || !projects.some((p) => p.id === activeProjectId)) {
+    activeProjectId = defaultProject.id;
+  }
+
   renderProjects(projects);
-  renderTodos(defaultProject.getTodos());
+  renderTodos(getActiveProject(projects, defaultProject).getTodos());
   setupProjectHandlers(projects, defaultProject, archiveProject);
+}
+
+function getActiveProject(projects, defaultProject) {
+  return projects.find((p) => p.id === activeProjectId) || defaultProject;
 }
 
 // Project Management
@@ -49,10 +61,14 @@ function renderProjects(projects) {
       (project) => `
     <div class="project-item ${
       project.name === "Archive" ? "archive-project" : ""
-    }" 
-         data-project-id="${project.id}">
+    }${project.id === activeProjectId ? " active" : ""}"
+         data-project-id="${project.id}" tabindex="0" aria-label="Project: ${
+        project.name
+      }">
       <h3>${project.name}</h3>
-      <span class="todo-count">${project.getTodos().length} tasks</span>
+      <span class="todo-count" aria-label="${
+        project.getTodos().length
+      } tasks">${project.getTodos().length} tasks</span>
     </div>
   `
     )
@@ -68,6 +84,10 @@ function renderTodos(todos) {
     todos.length === 0
       ? '<p class="empty-message">No tasks yet. Add one!</p>'
       : sortTodosByPriority(todos).map(createTodoHTML).join("");
+
+  // Set focus to first todo for accessibility
+  const firstTodo = container.querySelector(".todo-item");
+  if (firstTodo) firstTodo.setAttribute("tabindex", "0");
 }
 
 function sortTodosByPriority(todos) {
@@ -124,37 +144,62 @@ function formatDate(dateString) {
 function setupProjectHandlers(projects, defaultProject, archiveProject) {
   setupTodoForm(projects, defaultProject, archiveProject);
   setupProjectCreation(projects);
-  setupProjectSelection(projects);
+  setupProjectSelection(projects, defaultProject);
+  setupTodoActionDelegation(projects, defaultProject, archiveProject);
 }
 
 function setupTodoForm(projects, defaultProject, archiveProject) {
   const form = dom.todoForm();
   if (!form) return;
 
-  // Add project dropdown (excluding Archive)
-  const projectSelect = document.createElement("div");
-  projectSelect.className = "form-group";
-  projectSelect.innerHTML = `
-    <label for="project-assign">Project:</label>
-    <select id="project-assign" required>
-      ${projects
-        .filter((p) => p.name !== "Archive")
-        .map((p) => `<option value="${p.id}">${p.name}</option>`)
-        .join("")}
-    </select>
-  `;
-  form.insertBefore(
-    projectSelect,
-    form.querySelector("#dueDate").closest(".form-group")
-  );
+  // Only add the project dropdown if it doesn't exist
+  if (!form.querySelector("#project-assign")) {
+    const projectSelect = document.createElement("div");
+    projectSelect.className = "form-group";
+    projectSelect.innerHTML = `
+      <label for="project-assign">Project:</label>
+      <select id="project-assign" name="project-assign" required aria-label="Select project">
+        ${projects
+          .filter((p) => p.name !== "Archive")
+          .map((p) => `<option value="${p.id}">${p.name}</option>`)
+          .join("")}
+      </select>
+    `;
+    // Insert project select before dueDate group if possible, else at end
+    const dueDateGroup = form.querySelector("#dueDate")?.closest(".form-group");
+    if (dueDateGroup) {
+      form.insertBefore(projectSelect, dueDateGroup);
+      // Ensure dueDate input has name="dueDate"
+      const dueDateInput = form.querySelector("#dueDate");
+      if (dueDateInput && !dueDateInput.name) {
+        dueDateInput.name = "dueDate";
+      }
+    } else {
+      form.appendChild(projectSelect);
+    }
+  } else {
+    // Update dropdown options if projects changed
+    const select = form.querySelector("#project-assign");
+    select.innerHTML = projects
+      .filter((p) => p.name !== "Archive")
+      .map((p) => `<option value="${p.id}">${p.name}</option>`)
+      .join("");
+    // Ensure dueDate input has name="dueDate"
+    const dueDateInput = form.querySelector("#dueDate");
+    if (dueDateInput && !dueDateInput.name) {
+      dueDateInput.name = "dueDate";
+    }
+  }
 
-  form.addEventListener("submit", (e) => {
+  // Remove any previous submit event listeners to prevent double submission
+  const newForm = form.cloneNode(true);
+  form.parentNode.replaceChild(newForm, form);
+  // Now add the event listener to the new form
+  newForm.addEventListener("submit", (e) => {
     e.preventDefault();
-    const formData = new FormData(form);
+    const formData = new FormData(newForm);
     const title = formData.get("title");
-
-    // if (!title) return alert("Title is required!");
-
+    const dueDate = formData.get("dueDate");
     const selectedProject =
       projects.find((p) => p.id === formData.get("project-assign")) ||
       defaultProject;
@@ -163,29 +208,30 @@ function setupTodoForm(projects, defaultProject, archiveProject) {
         title,
         selectedProject.name,
         formData.get("description"),
-        formData.get("dueDate"),
+        dueDate,
         formData.get("priority") || "Normal"
       )
     );
 
     saveProjects(projects);
+    activeProjectId = selectedProject.id;
     renderTodos(selectedProject.getTodos());
     renderProjects(projects);
-    form.reset();
+    newForm.reset();
+    // Reset dropdown to default project
+    const select = newForm.querySelector("#project-assign");
+    if (select) select.value = defaultProject.id;
   });
+}
 
-  // Event delegation for todo actions
+// Only add the todo action event delegation once
+function setupTodoActionDelegation(projects, defaultProject, archiveProject) {
+  if (todoActionListenerAdded) return;
   document.addEventListener("click", (e) => {
     const todoId = e.target.dataset.todoId;
     if (!todoId) return;
 
-    const activeProject =
-      projects.find((p) =>
-        dom
-          .projectsContainer()
-          .querySelector(`[data-project-id="${p.id}"]`)
-          ?.classList.contains("active")
-      ) || defaultProject;
+    const activeProject = getActiveProject(projects, defaultProject);
 
     if (e.target.classList.contains("delete-btn")) {
       activeProject.removeTodo(todoId);
@@ -206,6 +252,7 @@ function setupTodoForm(projects, defaultProject, archiveProject) {
     );
     renderProjects(projects);
   });
+  todoActionListenerAdded = true;
 }
 
 function setupProjectCreation(projects) {
@@ -235,18 +282,17 @@ function setupProjectCreation(projects) {
     newProjectBtn().style.display = "block";
     renderProjects(projects);
 
-    // Update project dropdown in todo form
-    const select = document.getElementById("project-assign");
-    if (select) {
+    // Update all project dropdowns in todo forms
+    document.querySelectorAll("#project-assign").forEach((select) => {
       select.innerHTML = projects
         .filter((p) => p.name !== "Archive")
         .map((p) => `<option value="${p.id}">${p.name}</option>`)
         .join("");
-    }
+    });
   });
 }
 
-function setupProjectSelection(projects) {
+function setupProjectSelection(projects, defaultProject) {
   dom.projectsContainer()?.addEventListener("click", (e) => {
     const projectItem = e.target.closest(".project-item");
     if (!projectItem) return;
@@ -256,6 +302,7 @@ function setupProjectSelection(projects) {
     );
     if (!project) return;
 
+    activeProjectId = project.id;
     document
       .querySelectorAll(".project-item")
       .forEach((item) => item.classList.toggle("active", item === projectItem));
