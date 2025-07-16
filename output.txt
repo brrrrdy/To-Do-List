@@ -13,7 +13,6 @@
 │   ├── index.html
 │   ├── index.js
 │   ├── models
-│   │   ├── form.js
 │   │   ├── projects.js
 │   │   └── toDos.js
 │   ├── styles.css
@@ -25,4 +24,4 @@
 │       └── localStorage.js
 └── webpack.config.js
 
-6 directories, 19 files
+6 directories, 18 files

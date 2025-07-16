@@ -1,50 +1,33 @@
-import { initForm } from "../models/form.js";
 import { Project, loadProjects, saveProjects } from "../models/projects.js";
+import ToDo from "../models/toDos.js";
 
 export function renderUI() {
-  try {
-    // 1. Load or initialize projects
-    let projects = loadProjects();
-    console.log("Initial projects:", projects);
+  // Initialize projects and get default project
+  const projects = loadProjects();
+  const defaultProject = ensureDefaultProject(projects);
 
-    // 2. Ensure default project exists
-    let defaultProject = projects.find((p) => p.name === "Default Project");
-    if (!defaultProject) {
-      console.log("Creating default project");
-      defaultProject = new Project("Default Project");
-      projects.push(defaultProject);
-      saveProjects(projects);
-    }
+  // Initial render
+  renderProjects(projects);
+  renderTodos(defaultProject.getTodos());
 
-    // 3. Render initial state
-    renderProjects(projects);
-    renderTodos(defaultProject.getTodos());
-    console.log("Initial todos:", defaultProject.getTodos());
+  // Setup form handler
+  setupTodoForm(defaultProject, projects);
+}
 
-    // 4. Set up form handler
-    initForm((newTodo) => {
-      console.log("New todo received:", newTodo);
-
-      // Add to default project
-      defaultProject.addTodo(newTodo);
-      console.log("Updated todos:", defaultProject.getTodos());
-
-      // Persist and re-render
-      saveProjects(projects);
-      renderProjects(projects);
-      renderTodos(defaultProject.getTodos());
-    });
-  } catch (error) {
-    console.error("Error in renderUI:", error);
+// Helper functions
+function ensureDefaultProject(projects) {
+  let defaultProject = projects.find((p) => p.name === "Default Project");
+  if (!defaultProject) {
+    defaultProject = new Project("Default Project");
+    projects.push(defaultProject);
+    saveProjects(projects);
   }
+  return defaultProject;
 }
 
 function renderProjects(projects) {
   const container = document.getElementById("projects-container");
-  if (!container) {
-    console.error("Projects container not found");
-    return;
-  }
+  if (!container) return;
 
   container.innerHTML = projects
     .map(
@@ -60,23 +43,12 @@ function renderProjects(projects) {
 
 function renderTodos(todos) {
   const container = document.getElementById("todos-container");
-  if (!container) {
-    console.error("Todos container not found!");
-    return;
-  }
+  if (!container) return;
 
-  console.log("Rendering todos:", todos);
-  container.innerHTML = "";
-
-  if (todos.length === 0) {
-    container.innerHTML = '<p class="empty-message">No tasks yet. Add one!</p>';
-    return;
-  }
-
-  const sortedTodos = sortTodosByPriority(todos);
-  sortedTodos.forEach((todo) => {
-    container.appendChild(createTodoElement(todo));
-  });
+  container.innerHTML =
+    todos.length === 0
+      ? '<p class="empty-message">No tasks yet. Add one!</p>'
+      : sortTodosByPriority(todos).map(createTodoHTML).join("");
 }
 
 function sortTodosByPriority(todos) {
@@ -86,44 +58,33 @@ function sortTodosByPriority(todos) {
   );
 }
 
-function createTodoElement(todo) {
-  const element = document.createElement("div");
-  element.className = `todo-item ${todo.priority.toLowerCase()}`;
-  element.dataset.todoId = todo.noteID;
-
-  element.innerHTML = `
-    <div class="todo-header">
-      <h3 class="todo-title">${todo.title}</h3>
-      <span class="priority-badge ${todo.priority.toLowerCase()}">
-        ${todo.priority}
-      </span>
-    </div>
-    <p class="todo-description">${todo.description || "No description"}</p>
-    <div class="todo-footer">
-      <span class="due-date">${formatDate(todo.dueDate)}</span>
-      <div class="todo-actions">
-        <button class="complete-btn" data-todo-id="${todo.noteID}">✓</button>
-        <button class="delete-btn" data-todo-id="${todo.noteID}">✕</button>
+function createTodoHTML(todo) {
+  return `
+    <div class="todo-item ${todo.priority.toLowerCase()}" data-todo-id="${
+    todo.noteID
+  }">
+      <div class="todo-header">
+        <h3 class="todo-title">${todo.title}</h3>
+        <span class="priority-badge ${todo.priority.toLowerCase()}">
+          ${todo.priority}
+        </span>
+      </div>
+      <p class="todo-description">${todo.description || "No description"}</p>
+      <div class="todo-footer">
+        <span class="due-date">${formatDate(todo.dueDate)}</span>
+        <div class="todo-actions">
+          <button class="complete-btn" data-todo-id="${todo.noteID}">✓</button>
+          <button class="delete-btn" data-todo-id="${todo.noteID}">✕</button>
+        </div>
       </div>
     </div>
   `;
-
-  // Add event listeners
-  element
-    .querySelector(".complete-btn")
-    .addEventListener("click", () => toggleTodoComplete(todo.noteID));
-  element
-    .querySelector(".delete-btn")
-    .addEventListener("click", () => deleteTodo(todo.noteID));
-
-  return element;
 }
 
 function formatDate(dateString) {
   if (!dateString) return "No due date";
   try {
-    const date = new Date(dateString);
-    return date.toLocaleDateString("en-US", {
+    return new Date(dateString).toLocaleDateString("en-US", {
       month: "short",
       day: "numeric",
       year: "numeric",
@@ -133,25 +94,44 @@ function formatDate(dateString) {
   }
 }
 
-function toggleTodoComplete(todoId) {
-  const projects = loadProjects();
-  const project =
-    projects.find((p) => p.name === "Default Project") || projects[0];
-  const todo = project.getTodos().find((t) => t.noteID === todoId);
+function setupTodoForm(defaultProject, projects) {
+  const form = document.getElementById("todo-form");
+  if (!form) return;
 
-  if (todo) {
-    todo.isCompleted = !todo.isCompleted;
+  form.addEventListener("submit", (e) => {
+    e.preventDefault();
+
+    const formData = new FormData(form);
+    const newTodo = new ToDo(
+      formData.get("title"),
+      "Default Project",
+      formData.get("description"),
+      formData.get("dueDate"),
+      formData.get("priority")
+    );
+
+    defaultProject.addTodo(newTodo);
     saveProjects(projects);
-    renderTodos(project.getTodos());
-  }
-}
+    renderTodos(defaultProject.getTodos());
+    form.reset();
+  });
 
-function deleteTodo(todoId) {
-  const projects = loadProjects();
-  const project =
-    projects.find((p) => p.name === "Default Project") || projects[0];
+  // Event delegation for todo actions
+  document.addEventListener("click", (e) => {
+    const todoId = e.target.dataset.todoId;
+    if (!todoId) return;
 
-  project.removeTodo(todoId);
-  saveProjects(projects);
-  renderTodos(project.getTodos());
+    if (e.target.classList.contains("delete-btn")) {
+      defaultProject.removeTodo(todoId);
+      saveProjects(projects);
+      renderTodos(defaultProject.getTodos());
+    } else if (e.target.classList.contains("complete-btn")) {
+      const todo = defaultProject.getTodos().find((t) => t.noteID === todoId);
+      if (todo) {
+        todo.isCompleted = !todo.isCompleted;
+        saveProjects(projects);
+        renderTodos(defaultProject.getTodos());
+      }
+    }
+  });
 }
