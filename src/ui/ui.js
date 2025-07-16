@@ -7,7 +7,10 @@ export function renderUI() {
 
   renderProjects(projects);
   renderTodos(defaultProject.getTodos());
+
   setupTodoForm(defaultProject, projects);
+  setupProjectCreation(projects); // Add this line
+  setupProjectSelection(projects); // Add project switching
 }
 
 // Project Helpers
@@ -101,6 +104,23 @@ function setupTodoForm(defaultProject, projects) {
   const form = document.getElementById("todo-form");
   if (!form) return;
 
+  // Create project select element
+  const projectSelect = document.createElement("div");
+  projectSelect.className = "form-group";
+  projectSelect.innerHTML = `
+    <label for="project-assign">Project:</label>
+    <select id="project-assign" required>
+      ${projects
+        .map((p) => `<option value="${p.id}">${p.name}</option>`)
+        .join("")}
+    </select>
+  `;
+
+  // Insert after title field and before date field
+  const titleGroup = form.querySelector("#title").closest(".form-group");
+  const dateGroup = form.querySelector("#dueDate").closest(".form-group");
+  form.insertBefore(projectSelect, dateGroup);
+
   form.addEventListener("submit", (e) => {
     e.preventDefault();
 
@@ -108,42 +128,83 @@ function setupTodoForm(defaultProject, projects) {
     const description = form.querySelector("#description").value;
     const priority = form.querySelector("#priority").value || "Normal";
     const dueDate = form.querySelector("#dueDate").value;
+    const projectId = form.querySelector("#project-assign").value;
 
     if (!title) {
       alert("Title is required!");
       return;
     }
 
+    const selectedProject =
+      projects.find((p) => p.id === projectId) || defaultProject;
     const newTodo = new ToDo(
       title,
-      "Default Project",
+      selectedProject.name,
       description,
-      dueDate, // Store raw date string
+      dueDate,
       priority
     );
 
-    defaultProject.addTodo(newTodo);
+    selectedProject.addTodo(newTodo);
     saveProjects(projects);
-    renderTodos(defaultProject.getTodos());
+    renderTodos(selectedProject.getTodos());
+    renderProjects(projects);
     form.reset();
   });
 
-  // Event Delegation
-  document.addEventListener("click", (e) => {
-    const todoId = e.target.dataset.todoId;
-    if (!todoId) return;
+  // ... rest of your existing event delegation code ...
+}
+function setupProjectCreation(projects) {
+  const newProjectBtn = document.getElementById("new-project-btn");
+  const projectForm = document.getElementById("new-project-form");
+  const cancelBtn = document.querySelector(".cancel-project-btn");
 
-    if (e.target.classList.contains("delete-btn")) {
-      defaultProject.removeTodo(todoId);
-      saveProjects(projects);
-      renderTodos(defaultProject.getTodos());
-    } else if (e.target.classList.contains("complete-btn")) {
-      const todo = defaultProject.getTodos().find((t) => t.noteID === todoId);
-      if (todo) {
-        todo.isCompleted = !todo.isCompleted;
-        saveProjects(projects);
-        renderTodos(defaultProject.getTodos());
-      }
-    }
+  newProjectBtn.addEventListener("click", () => {
+    newProjectBtn.style.display = "none";
+    projectForm.style.display = "block";
   });
+
+  cancelBtn.addEventListener("click", () => {
+    projectForm.style.display = "none";
+    newProjectBtn.style.display = "block";
+  });
+
+  projectForm.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const projectName = document.getElementById("project-name").value.trim();
+
+    if (!projectName) {
+      alert("Project name is required!");
+      return;
+    }
+
+    const newProject = new Project(projectName);
+    projects.push(newProject);
+    saveProjects(projects);
+
+    projectForm.reset();
+    projectForm.style.display = "none";
+    newProjectBtn.style.display = "block";
+
+    renderProjects(projects);
+  });
+}
+
+function setupProjectSelection(projects) {
+  document
+    .getElementById("projects-container")
+    .addEventListener("click", (e) => {
+      const projectItem = e.target.closest(".project-item");
+      if (projectItem) {
+        const projectId = projectItem.dataset.projectId;
+        const project = projects.find((p) => p.id === projectId);
+        renderTodos(project.getTodos());
+
+        // Update active project highlight
+        document.querySelectorAll(".project-item").forEach((item) => {
+          item.classList.remove("active");
+        });
+        projectItem.classList.add("active");
+      }
+    });
 }
