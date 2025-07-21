@@ -1,4 +1,4 @@
-import { addDays, format, parseISO, isValid } from "date-fns";
+import { format, parseISO, isValid } from "date-fns";
 
 /**
  * Format an ISO or raw date string into 'yyyy-MM-dd' format
@@ -11,7 +11,7 @@ export function newDate(date) {
   try {
     const parsed = parseISO(date);
     return isValid(parsed) ? format(parsed, "yyyy-MM-dd") : null;
-  } catch (err) {
+  } catch {
     console.warn("Invalid date:", date);
     return null;
   }

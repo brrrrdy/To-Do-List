@@ -144,11 +144,11 @@ function formatDate(dateString) {
 function setupProjectHandlers(projects, defaultProject, archiveProject) {
   setupTodoForm(projects, defaultProject, archiveProject);
   setupProjectCreation(projects);
-  setupProjectSelection(projects, defaultProject);
+  setupProjectSelection(projects);
   setupTodoActionDelegation(projects, defaultProject, archiveProject);
 }
 
-function setupTodoForm(projects, defaultProject, archiveProject) {
+function setupTodoForm(projects, defaultProject) {
   const form = dom.todoForm();
   if (!form) return;
 
@@ -292,7 +292,7 @@ function setupProjectCreation(projects) {
   });
 }
 
-function setupProjectSelection(projects, defaultProject) {
+function setupProjectSelection(projects) {
   dom.projectsContainer()?.addEventListener("click", (e) => {
     const projectItem = e.target.closest(".project-item");
     if (!projectItem) return;
