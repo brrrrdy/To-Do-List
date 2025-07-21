@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>To-Do-List</title>
+    <link rel="stylesheet" href="84bb4fc080631c2605f1.css" />
+  <script defer src="main.js"></script></head>
+  <body>
+    <div class="app-container">
+      <header class="app-header">
+        <h1>To-Do List</h1>
+        <div class="dropdown">
+          <button class="dropbtn">Dropdown</button>
+          <div id="myDropdown" class="dropdown-content">
+            <a href="#">Option 1</a>
+            <a href="#">Option 2</a>
+            <a href="#">Option 3</a>
+          </div>
+        </div>
+      </header>
+
+      <div class="main-content">
+        <aside class="sidebar">
+          <h2>Projects</h2>
+          <div id="projects-container" class="projects-list"></div>
+
+          <button id="new-project-btn" class="new-project-btn">
+            New Project
+          </button>
+
+          <form
+            id="new-project-form"
+            class="new-project-form"
+            style="display: none"
+          >
+            <input
+              type="text"
+              id="project-name"
+              placeholder="Project name"
+              required
+            />
+            <div class="project-form-buttons">
+              <button type="submit" class="add-project-btn">Add Project</button>
+              <button type="button" class="cancel-project-btn">Cancel</button>
+            </div>
+          </form>
+        </aside>
+
+        <main class="todo-content">
+          <form id="todo-form" class="todo-form">
+            <h2>Add New Task</h2>
+            <div class="form-group">
+              <input
+                type="text"
+                id="title"
+                name="title"
+                placeholder="Title"
+                required
+              />
+            </div>
+            <div class="form-group">
+              <input type="date" id="dueDate" required />
+            </div>
+            <div class="form-group">
+              <textarea
+                placeholder="Description"
+                id="description"
+                rows="3"
+              ></textarea>
+            </div>
+            <div class="form-group">
+              <label for="priority">Priority:</label>
+              <select id="priority" name="priority" required>
+                <option value="Low">Low</option>
+                <option value="Normal" selected>Normal</option>
+                <option value="High">High</option>
+                <option value="Urgent">Urgent</option>
+              </select>
+            </div>
+            <button type="submit" class="submit-btn">Add Task</button>
+          </form>
+
+          <div class="todos-container">
+            <h2>Your Tasks</h2>
+            <div id="todos-container" class="todos-list"></div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </body>
+</html>
