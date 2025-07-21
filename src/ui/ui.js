@@ -1,5 +1,6 @@
 import { Project, loadProjects, saveProjects } from "../models/projects.js";
 import ToDo from "../models/toDos.js";
+import { dropDn } from "./dropDown.js";
 
 // DOM Elements
 const dom = {
@@ -309,3 +310,8 @@ function setupProjectSelection(projects) {
     renderTodos(project.getTodos());
   });
 }
+
+document.addEventListener("DOMContentLoaded", () => {
+  const btn = document.querySelector(".dropbtn");
+  if (btn) btn.addEventListener("click", dropDn);
+});
